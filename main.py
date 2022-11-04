@@ -1,7 +1,5 @@
 import pygame, sys
-
 from pygame.locals import *
-
 from class_player import class_player
 
 
@@ -10,37 +8,40 @@ from class_player import class_player
 pygame.init()
 
 """     Screen    """
+FPS = 60
+FramePerSec = pygame.time.Clock()
 pygame.display.set_caption("Game XD")
-size_of_screen = width, height = 640, 480
+size_of_screen = width, height = 1280, 720
 screen = pygame.display.set_mode((size_of_screen))
-background_color = (120,250,250)
+background_color = (50,250,30)
+clock = pygame.time.Clock()
 
 
 """     Variables used in game      """
-color = (255,0,0)
-size_of_player = 20
-speed = 0.05
+size_of_player = 0.4
+speed = 4
 
+bullet_speed = 20
 
 player = class_player(size_of_player)
 
 
-while True:
-    pygame.display.update()
 
+while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-    screen.fill(background_color) # Set the background color
+
+    player.draw(screen)                             # Draw the player
+    player.Movement(speed, width, height)           # Update movemento of the player and if exited display
+
+    dt = clock.tick(FPS) / 1000                      # Need this for create an a timer of bullets
+    player.Rotation_Shoot(pygame.mouse.get_pos(), bullet_speed, screen, dt)
+    
 
 
-    pygame.draw.rect(screen, color, player.player_Draw()) # Draw the player                             rect(Donde se dibuja, color, (pos_x, pos_y, alto, ancho))
-    player.movement(speed)              # Call a movement of the player
-    player.exit_window(width, height)   # Check if the player exited the window
-    
-    """if pygame.mouse.get_pressed() == (1,0,0):
-        print("Fire!")
-    
-    print(pygame.mouse.get_pos())"""
+    pygame.display.update() 
+    FramePerSec.tick(FPS)
+    screen.fill(background_color)                       # Set the background color
