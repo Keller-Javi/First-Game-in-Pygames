@@ -15,7 +15,6 @@ class class_player(pygame.sprite.Sprite):
     def __init__(self, size):
         self._img = pygame.image.load("Assets/Player.gif") # Load and set the image of the player 
         self._img = pygame.transform.scale(self._img, (int(250*size),int(213*size)))
-        self._img = pygame.transform.rotate(self._img, 360)
 
         self._img_rot = self._img               #Set a copy of the original image
         self._rect = self._img_rot.get_rect()
@@ -77,7 +76,7 @@ class class_player(pygame.sprite.Sprite):
 
     #               Rotate player respectively to position of mouse
 
-    def Rotation_Shoot(self, pos_of_mouse, bullet_speed, screen, dt):
+    def Rotation_Shoot(self, pos_of_mouse, bullet_speed, screen, dt, enemy_instances):
         xp, yp = pos_of_mouse[0] - self._pos[0], pos_of_mouse[1] - self._pos[1] # Vector of mouse relative to player
 
         mod = math.hypot(xp, yp)
@@ -100,5 +99,8 @@ class class_player(pygame.sprite.Sprite):
         
 
         for bullet in self._bullets:
-            bullet.draw(screen)
+            bullet.draw(screen, enemy_instances, dt)
+
+            if bullet.destroy:
+                self._bullets.remove(bullet)
 
