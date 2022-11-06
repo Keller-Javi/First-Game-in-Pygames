@@ -11,14 +11,16 @@ class class_player(pygame.sprite.Sprite):
     _bullets = []
     _time_to_shoot = 0.5
     _timer = _time_to_shoot
+    _kill = False
 
-    def __init__(self, size):
+    def __init__(self, size, life):
         self._img = pygame.image.load("Assets/Player.gif") # Load and set the image of the player 
         self._img = pygame.transform.scale(self._img, (int(250*size),int(213*size)))
 
         self._img_rot = self._img               #Set a copy of the original image
         self._rect = self._img_rot.get_rect()
         self._rect.center = self._pos
+        self._life = life
     
 
 
@@ -33,6 +35,21 @@ class class_player(pygame.sprite.Sprite):
     @property
     def position(self):
         return self._pos
+    
+    @property
+    def rect(self):
+        return self._rect
+    
+    @property
+    def life(self):
+        return self._life
+    @life.setter
+    def life(self, value):
+        self._life  = value
+    
+    @property
+    def kill(self):
+        return self._kill
 
 
 
@@ -70,6 +87,10 @@ class class_player(pygame.sprite.Sprite):
             self._pos[1] = -self._size
         elif self._pos[1] < -self._size:
             self._pos[1] = height+self._size
+        
+
+        if self._life <= 0:
+            self._kill = True
 
 
 
@@ -103,4 +124,3 @@ class class_player(pygame.sprite.Sprite):
 
             if bullet.destroy:
                 self._bullets.remove(bullet)
-
