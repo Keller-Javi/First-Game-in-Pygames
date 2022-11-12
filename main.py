@@ -6,6 +6,7 @@ import random
 
 from class_player import class_player
 from class_enemy import class_enemy
+from small_classes import life_bar, pools_blood
 
 
 pygame.init()
@@ -30,6 +31,9 @@ restart_button = pygame_gui.elements.UIButton(
 
 font = pygame.font.SysFont(None, 30)
 
+lbar = life_bar()
+
+
 """     Variables used in game      """
 life_of_player = 5
 speed = 4
@@ -42,6 +46,7 @@ life_of_enemy = 3
 speed_of_enemy = 1.5
 count_enemies = 0
 enemies = []
+list_pools_blood = []
 
 while True:
     # Need this for create an a timers
@@ -55,8 +60,12 @@ while True:
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == restart_button:
                 player = class_player(life_of_player)
+                list_pools_blood = []
 
         manager_restart.process_events(event)
+
+    for x in list_pools_blood:
+        x.draw(screen)
 
     if player:
         player.draw(screen)                             # Draw the player
@@ -83,6 +92,7 @@ while True:
             enemy.draw(screen)
 
             if enemy.kill:
+                list_pools_blood.append(pools_blood(enemy.position))
                 enemies.remove(enemy)
                 count_enemies -= 1
                 player.kills += 1
@@ -90,9 +100,12 @@ while True:
         img = font.render('Kills: ' + str(player.kills), True, (255, 255, 255))
         screen.blit(img, (20, 20))
 
+        lbar.draw(screen, width, player.life/5)
+
     else:  # if player not exists, draw ui to restart
         manager_restart.update(dt)
         manager_restart.draw_ui(screen)
+
     pygame.display.update()
     FramePerSec.tick(FPS)
     # Set the background color

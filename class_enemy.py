@@ -1,5 +1,4 @@
 import pygame
-import sys
 from pygame.locals import *
 import math
 
@@ -41,6 +40,10 @@ class class_enemy:
     @life.setter  # Need to apply damago with a bullet
     def life(self, value):
         self._life = value
+
+    @property
+    def position(self):
+        return self._position
 
     def draw(self, surface):  # Draw enemy
         surface.blit(self._img_rot, self._rect)

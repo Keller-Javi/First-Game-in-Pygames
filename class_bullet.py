@@ -1,5 +1,4 @@
 import pygame
-import sys
 from pygame.locals import *
 
 size = 0.02
