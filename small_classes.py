@@ -3,7 +3,7 @@ from pygame.locals import *
 import random
 
 
-class pools_blood:
+class PoolsBlood:
     def __init__(self, position):
         self._img = pygame.image.load(
             "Assets/Blood/Blood-%s.png" % (str(random.randint(1, 3))))
@@ -16,7 +16,7 @@ class pools_blood:
         surface.blit(self._img, self._rect)
 
 
-class life_bar:
+class LifeBar:
     def __init__(self):
         self._maxwidth = 200
         self._height = 30

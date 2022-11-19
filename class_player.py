@@ -1,18 +1,19 @@
 import pygame
 from pygame.locals import *
 import math
-from class_bullet import class_bullet
+from class_bullet import ClassBullet
 
 
 size = 0.3
+bullet_img = pygame.image.load("Assets/Bullet.png")
+bullet_img = pygame.transform.scale(bullet_img, (int(730*0.02), int(172*0.02)))
 
 
-class class_player(pygame.sprite.Sprite):
+class ClassPlayer(pygame.sprite.Sprite):
     def __init__(self, life):
         self._pos = [200, 200]
         self._vect_dir = [0, 0]
         self._size = 100
-        self._bullets = []
         self._time_to_shoot = 0.5
         self._timer = self._time_to_shoot
         self._death = False
@@ -65,7 +66,7 @@ class class_player(pygame.sprite.Sprite):
 
     #               Movement of the player
 
-    def Movement(self, speed, width, height):  # Update player actions
+    def Movement(self, speed):  # Update player actions
         if pygame.key.get_pressed()[K_w]:  # Direction of rect in Y axis
             self._vect_dir[1] = -1
         elif pygame.key.get_pressed()[K_s]:
@@ -91,7 +92,7 @@ class class_player(pygame.sprite.Sprite):
 
     #               Rotate player respectively to position of mouse
 
-    def Rotation_Shoot(self, pos_of_mouse, bullet_speed, screen, dt, enemy_instances):
+    def Rotation_Shoot(self, pos_of_mouse, bullet_speed, dt, bullet_list):
         # Vector of mouse relative to player
         xp, yp = pos_of_mouse[0] - self._pos[0], pos_of_mouse[1] - self._pos[1]
 
@@ -109,13 +110,7 @@ class class_player(pygame.sprite.Sprite):
         if (pygame.mouse.get_pressed() == (1, 0, 0)) and self._timer <= 0:
             dir_normalized = (xp/math.hypot(xp, yp), yp/math.hypot(xp, yp))
 
-            self._bullets.append(class_bullet(bullet_speed, angle, [
-                                 self._pos[0], self._pos[1]], dir_normalized))
+            bullet_list.append(ClassBullet(
+                bullet_img, bullet_speed, angle, self._pos.copy(), dir_normalized))
 
             self._timer = self._time_to_shoot
-
-        for bullet in self._bullets:
-            bullet.draw(screen, enemy_instances, dt)
-
-            if bullet.destroy:
-                self._bullets.remove(bullet)

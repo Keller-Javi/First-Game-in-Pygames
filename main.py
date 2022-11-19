@@ -4,9 +4,9 @@ import pygame_gui
 from pygame.locals import *
 import random
 
-from class_player import class_player
-from class_enemy import class_enemy
-from small_classes import life_bar, pools_blood
+from class_player import ClassPlayer
+from class_enemy import Enemy, EnemyRange
+from small_classes import LifeBar, PoolsBlood
 
 
 pygame.init()
@@ -30,16 +30,19 @@ restart_button = pygame_gui.elements.UIButton(
 
 
 font = pygame.font.SysFont(None, 30)
+font2 = pygame.font.SysFont(None, 60)
 
-lbar = life_bar()
+lbar = LifeBar()
 
 
 """     Variables used in game      """
-life_of_player = 5
+life_of_player = 10
 speed = 4
 bullet_speed = 20
+bullets_of_player = []
+kills = 0
 
-player = class_player(life_of_player)
+player = ClassPlayer(life_of_player)
 
 
 life_of_enemy = 3
@@ -47,6 +50,10 @@ speed_of_enemy = 1.5
 count_enemies = 0
 enemies = []
 list_pools_blood = []
+timer_to_respawn = 0
+amount_enemies = 7
+
+bullets_of_enemies = []
 
 while True:
     # Need this for create an a timers
@@ -59,52 +66,84 @@ while True:
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == restart_button:
-                player = class_player(life_of_player)
+                player = ClassPlayer(life_of_player)
                 list_pools_blood = []
+                enemies = []
+                count_enemies = 0
 
         manager_restart.process_events(event)
 
-    for x in list_pools_blood:
+    for x in list_pools_blood: # Draw blood
         x.draw(screen)
 
     if player:
         player.draw(screen)                             # Draw the player
         # Update movemento of the player and if exited display
-        player.Movement(speed, width, height)
+        player.Movement(speed)
 
         # call update of shots an rotatio of the player
         player.Rotation_Shoot(pygame.mouse.get_pos(),
-                              bullet_speed, screen, dt, enemies)
+                              bullet_speed, dt, bullets_of_player)
 
         if player.death:
+            list_pools_blood.append(PoolsBlood(player.position))
+            kills = player.kills
             player = None
             continue
 
-        while count_enemies < 4:  # Create N enemies, if is necessary
+        while count_enemies < amount_enemies and timer_to_respawn <= 0:  # Create N enemies, if is necessary
             point = [random.randint(0, width), random.randint(
                 0, height)]  # random point for each enemy
-            enemies.append(class_enemy(point, speed_of_enemy,
-                                       life_of_enemy))  # Create enemy
-            count_enemies += 1
+            if random.randint(0, 2) == 0:
+                enemies.append(EnemyRange(point, speed_of_enemy,
+                                          life_of_enemy))  # Create range enemy
+            else:
+                enemies.append(Enemy(point, speed_of_enemy,
+                                     life_of_enemy))  # Create normal enemy
 
-        for enemy in enemies:  # Update all enemy classes
-            enemy.update(player, dt)
+            count_enemies += 1
+            timer_to_respawn = random.uniform(1, 2.5)
+
+        timer_to_respawn -= dt
+
+        for enemy in enemies:  # Update all enemies (normal and range enemies)
+            if enemy.type == 'N':
+                enemy.update(player, dt)
+            elif enemy.type == 'R':
+                enemy.update(player, dt, bullets_of_enemies)
+
             enemy.draw(screen)
 
             if enemy.kill:
-                list_pools_blood.append(pools_blood(enemy.position))
+                list_pools_blood.append(PoolsBlood(enemy.position))
                 enemies.remove(enemy)
                 count_enemies -= 1
                 player.kills += 1
+                
 
         img = font.render('Kills: ' + str(player.kills), True, (255, 255, 255))
         screen.blit(img, (20, 20))
 
-        lbar.draw(screen, width, player.life/5)
+        lbar.draw(screen, width, player.life/10)
 
     else:  # if player not exists, draw ui to restart
         manager_restart.update(dt)
         manager_restart.draw_ui(screen)
+
+        img = font2.render('Kills: ' + str(kills), True, (255, 255, 255))
+        screen.blit(img, (width/2.3, height/2.7))
+
+    for bullet in bullets_of_player:  # Update bullets of player
+        bullet.draw(screen, enemies, dt)
+
+        if bullet.destroy:
+            bullets_of_player.remove(bullet)
+
+    for bullet in bullets_of_enemies:  # update bullets of enemies
+        bullet.draw(screen, [player], dt)
+
+        if bullet.destroy:
+            bullets_of_enemies.remove(bullet)
 
     pygame.display.update()
     FramePerSec.tick(FPS)
