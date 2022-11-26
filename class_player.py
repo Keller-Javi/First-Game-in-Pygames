@@ -1,12 +1,11 @@
 import pygame
 from pygame.locals import *
 import math
+
 from class_bullet import ClassBullet
 
 
-size = 0.3
 bullet_img = pygame.image.load("Assets/Bullet.png")
-bullet_img = pygame.transform.scale(bullet_img, (int(730*0.02), int(172*0.02)))
 
 
 class ClassPlayer(pygame.sprite.Sprite):
@@ -21,8 +20,6 @@ class ClassPlayer(pygame.sprite.Sprite):
 
         # Load and set the image of the player
         self._img = pygame.image.load("Assets/Player.gif")
-        self._img = pygame.transform.scale(
-            self._img, (int(194*size), int(147*size)))
 
         self._img_rot = self._img  # Set a copy of the original image
         self._rect = self._img_rot.get_rect()

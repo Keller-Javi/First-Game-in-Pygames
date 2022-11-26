@@ -6,7 +6,7 @@ import random
 
 from class_player import ClassPlayer
 from class_enemy import Enemy, EnemyRange
-from small_classes import LifeBar, PoolsBlood
+from small_classes import LifeBar, PoolsBlood, Hit
 
 
 pygame.init()
@@ -46,7 +46,7 @@ player = ClassPlayer(life_of_player)
 
 
 life_of_enemy = 3
-speed_of_enemy = 1.5
+speed_of_enemy = 1
 count_enemies = 0
 enemies = []
 list_pools_blood = []
@@ -54,6 +54,11 @@ timer_to_respawn = 0
 amount_enemies = 7
 
 bullets_of_enemies = []
+
+time_hit = 0.1
+hits = []
+
+write_score = False
 
 while True:
     # Need this for create an a timers
@@ -71,10 +76,12 @@ while True:
                 enemies = []
                 count_enemies = 0
 
-        manager_restart.process_events(event)
+        if not player:
+            # if player not exist, gets the events of manager restart
+            manager_restart.process_events(event)
 
-    for x in list_pools_blood: # Draw blood
-        x.draw(screen)
+    for blood in list_pools_blood:  # Draw blood
+        blood.draw(screen)
 
     if player:
         player.draw(screen)                             # Draw the player
@@ -89,17 +96,18 @@ while True:
             list_pools_blood.append(PoolsBlood(player.position))
             kills = player.kills
             player = None
+            write_score = True
             continue
 
         while count_enemies < amount_enemies and timer_to_respawn <= 0:  # Create N enemies, if is necessary
             point = [random.randint(0, width), random.randint(
                 0, height)]  # random point for each enemy
-            if random.randint(0, 2) == 0:
+            if random.randint(0, 3) == 2:
                 enemies.append(EnemyRange(point, speed_of_enemy,
-                                          life_of_enemy))  # Create range enemy
+                                    life_of_enemy))  # Create range enemy
             else:
                 enemies.append(Enemy(point, speed_of_enemy,
-                                     life_of_enemy))  # Create normal enemy
+                                    life_of_enemy))  # Create normal enemy
 
             count_enemies += 1
             timer_to_respawn = random.uniform(1, 2.5)
@@ -119,31 +127,54 @@ while True:
                 enemies.remove(enemy)
                 count_enemies -= 1
                 player.kills += 1
-                
 
         img = font.render('Kills: ' + str(player.kills), True, (255, 255, 255))
         screen.blit(img, (20, 20))
 
-        lbar.draw(screen, width, player.life/10)
+        lbar.draw(screen, width, player.life/life_of_player)
 
     else:  # if player not exists, draw ui to restart
+        if write_score:
+            arch = open("gamedata/score.txt", "a")
+            arch.write(str(kills)+'\n')
+            arch.close()
+            arch = open("gamedata/score.txt", "r")
+            lis = arch.readlines()
+            lis = [int(x[0:len(x)-1]) for x in lis]
+            best = max(lis)
+            print(lis)
+
+            write_score = False
+
+            img = font2.render('Kills: ' + str(kills), True, (255, 255, 255))
+            img2 = font2.render('Best score: ' + str(best), True, (255, 255, 255))
+
         manager_restart.update(dt)
         manager_restart.draw_ui(screen)
 
-        img = font2.render('Kills: ' + str(kills), True, (255, 255, 255))
+        
         screen.blit(img, (width/2.3, height/2.7))
+        screen.blit(img2, (width/2.5, height/3.7))
 
     for bullet in bullets_of_player:  # Update bullets of player
         bullet.draw(screen, enemies, dt)
 
         if bullet.destroy:
+            hits.append(Hit(time_hit, bullet.position))
             bullets_of_player.remove(bullet)
 
     for bullet in bullets_of_enemies:  # update bullets of enemies
         bullet.draw(screen, [player], dt)
 
         if bullet.destroy:
+            hits.append(Hit(time_hit, bullet.position))
             bullets_of_enemies.remove(bullet)
+    
+    for h in hits:
+        h.draw(screen, dt)
+
+        if h.destroy:
+            hits.remove(h)
 
     pygame.display.update()
     FramePerSec.tick(FPS)

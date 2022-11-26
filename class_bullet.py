@@ -21,6 +21,10 @@ class ClassBullet:
     @property
     def destroy(self):
         return self._destroy
+    
+    @property
+    def position(self):
+        return self._position
 
     def draw(self, surface, enemy, dt):  # Update and draw a bullet
         self.update(enemy, dt)

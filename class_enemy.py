@@ -6,10 +6,7 @@ import math
 from class_bullet import ClassBullet
 
 
-size = 0.2
-
-bullet_img = pygame.image.load("Assets/Bullet.png")
-bullet_img = pygame.transform.scale(bullet_img, (int(730*0.02), int(172*0.02)))
+bullet_img = pygame.image.load("Assets/Stone.png")
 
 
 class ClassEnemy:
@@ -26,8 +23,6 @@ class ClassEnemy:
 
         # Load and set the image of the enemy
         self._img = pygame.image.load("Assets/Enemy.png")
-        self._img = pygame.transform.scale(
-            self._img, (int(188*size), int(166*size)))
 
         self._speed = speed
         self._position = position
